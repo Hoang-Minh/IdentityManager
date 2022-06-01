@@ -42,6 +42,12 @@ namespace IdentityManager
 
             }).AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            services.AddAuthentication().AddFacebook(options =>
+            {
+                options.AppId = "760133122002531";
+                options.AppSecret = "09e909f641da99ea4eaeaab67abcd010";
+            });
             services.AddControllersWithViews();
         }
 

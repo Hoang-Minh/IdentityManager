@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 // This is ASP net core Web MVC
@@ -212,6 +213,99 @@ namespace IdentityManager.Controllers
         {
             return View();
         }
+
+        [HttpPost]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            // request redirect to the external provider
+            var authenticationSchema = Url.Action("ExternalLoginCallBack", new { ReturnUrl = returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, authenticationSchema);
+
+            // I don't know this user, Please redirect him to facebook login !!!
+            // This essentially redirects user to external login provider - which in our case is facebook !!!
+
+            // once login successfully, it will redirect us back to the url inside the authenticationSchema !!! - which is ExternalLoginCallback
+            return Challenge(properties, provider);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        {
+            if(remoteError != null)
+            {
+                ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
+                return View(nameof(Login));
+            }
+
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+
+            if(info == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            // sign in user with external provider
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+
+            if(result.Succeeded)
+            {
+                // update any authentication token
+                await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
+
+                return LocalRedirect(returnUrl);
+            }
+            else
+            {
+                // user does not have an account ===> ask them to create one
+                ViewData["returnUrl"] = returnUrl;
+                ViewData["ProviderDisplayName"] = info.ProviderDisplayName;
+
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                var name = info.Principal.FindFirstValue(ClaimTypes.Name);
+
+                return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = email, Name = name });
+            }            
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginConfirmationViewModel model, string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            returnUrl ??= Url.Content("~/");
+
+            if (ModelState.IsValid)
+            {
+                var info = await _signInManager.GetExternalLoginInfoAsync();
+
+                if(info == null)
+                {
+                    return View("Error");
+                }
+
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, Name = model.Name };
+                var result = await _userManager.CreateAsync(user);
+
+                if(result.Succeeded)
+                {
+                    result = await _userManager.AddLoginAsync(user, info);
+
+                    if(result.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
+
+                        return LocalRedirect(returnUrl);
+                    }
+                }
+
+                AddErrors(result);
+            }
+
+            ViewData["returnUrl"] = returnUrl;
+
+            return View(model);
+        }        
 
         private void AddErrors(IdentityResult result)
         {
