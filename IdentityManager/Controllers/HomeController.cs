@@ -3,10 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
@@ -38,8 +35,16 @@ namespace IdentityManager.Controllers
             return View();
         }
 
-        [Authorize]
+        // by default, when a user is denied access to this page, he will be redirected to Account/AccessDenied
+        // we change this behavior by changing the path in startup with services.ConfigureApplicationCookie
+        [Authorize(Roles = "Admin")]
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
         {
             return View();
         }

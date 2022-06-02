@@ -48,6 +48,12 @@ namespace IdentityManager
                 options.AppId = "760133122002531";
                 options.AppSecret = "09e909f641da99ea4eaeaab67abcd010";
             });
+
+            services.ConfigureApplicationCookie(opt =>
+            {
+                opt.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Home/AccessDenied");
+            });
+
             services.AddControllersWithViews();
         }
 
