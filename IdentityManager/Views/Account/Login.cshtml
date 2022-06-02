@@ -5,7 +5,7 @@
 <h1 class="text-info">Login</h1>
 <div class="row">
     <div class="col-md-8">
-        <form asp-controller="Account" asp-action="Login" method="post" role="form" asp-route-my="@ViewData["ReturnUrl"]">
+        <form asp-controller="Account" asp-action="Login" method="post" role="form" asp-route-returnUrl="@ViewData["ReturnUrl"]">
             <h4>User a Local Account to Log in</h4>
             <hr />
             <div asp-validation-summary="All" class="text-danger"></div>
@@ -63,7 +63,7 @@
         <div class="col-md-4">
             <section>
                 <h4>Use another service to log in</h4>
-                <form asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@ViewData["returnUrl"] method="post" role="form">
+                <form asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@ViewData["returnUrl"]" method="post" role="form">
                     <div>
                         <p>
                             @foreach(var provider in loginProvider)
