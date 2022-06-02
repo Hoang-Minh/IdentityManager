@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
@@ -145,6 +146,64 @@ namespace IdentityManager.Controllers
 
             _applicationDbContext.Remove(userFromDb);
             _applicationDbContext.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ManageUserClaims(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if(user == null) return NotFound();
+            
+            var existingClaims = await _userManager.GetClaimsAsync(user);
+
+            var model = new UserClaimViewModel
+            {
+                UserId = userId
+            };
+
+            foreach(var claim in ClaimStore.ClaimList)
+            {
+                var userClaim = new UserClaim { ClaimType = claim.Type };
+
+                if(existingClaims.Any(x => x.Type == claim.Type))
+                {
+                    userClaim.IsSelected = true;
+                }
+
+                model.Claims.Add(userClaim);                
+            }
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManageUserClaims(UserClaimViewModel model)
+        {
+            var userFromDb = await _userManager.FindByIdAsync(model.UserId);
+
+
+            if (userFromDb == null) return NotFound();
+
+            // remove all existing claims
+            var existingClaims = await _userManager.GetClaimsAsync(userFromDb);
+            await _userManager.RemoveClaimsAsync(userFromDb, existingClaims);
+
+            var result = await _userManager.AddClaimsAsync(userFromDb, 
+                model.Claims.Where(x => x.IsSelected)
+                .Select(y => new Claim(y.ClaimType, y.IsSelected.ToString())));
+
+            if(!result.Succeeded)
+            {
+                TempData[SD.Success] = "Error while updating claim";
+            }
+            else
+            {
+                TempData[SD.Success] = "Claim updated successfully";
+            }            
 
             return RedirectToAction(nameof(Index));
         }
