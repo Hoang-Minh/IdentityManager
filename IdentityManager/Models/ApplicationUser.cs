@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,5 +16,8 @@ namespace IdentityManager.Models
 
         [NotMapped]
         public string Role { get; set; }
+
+        [NotMapped]
+        public IEnumerable<SelectListItem> RoleList { get; set; }
     }
 }
