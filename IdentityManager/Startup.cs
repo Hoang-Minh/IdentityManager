@@ -45,8 +45,9 @@ namespace IdentityManager
 
             services.AddAuthentication().AddFacebook(options =>
             {
-                options.AppId = "760133122002531";
-                options.AppSecret = "09e909f641da99ea4eaeaab67abcd010";
+                // PASTE VALUE IN HERE !!!
+                options.AppId = "";
+                options.AppSecret = "";
             });
 
             //services.ConfigureApplicationCookie(opt =>
