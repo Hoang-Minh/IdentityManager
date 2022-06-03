@@ -1,4 +1,5 @@
 ﻿using IdentityManager.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
@@ -43,6 +44,7 @@ namespace IdentityManager.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "OnlySuperAdminChecker")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upsert(IdentityRole roleObj)
         {
@@ -84,6 +86,7 @@ namespace IdentityManager.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "OnlySuperAdminChecker")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {

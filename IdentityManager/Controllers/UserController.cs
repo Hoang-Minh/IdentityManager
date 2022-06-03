@@ -24,7 +24,7 @@ namespace IdentityManager.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            var userList = _applicationDbContext.ApplicationUser.ToList();
+            var userList = _applicationDbContext.ApplicationUsers.ToList();
             var userRole = _applicationDbContext.UserRoles.ToList();
             var roles = _applicationDbContext.Roles.ToList();
 
@@ -51,7 +51,7 @@ namespace IdentityManager.Controllers
         [HttpGet]
         public IActionResult Edit(string userId)
         {
-            var user = _applicationDbContext.ApplicationUser.FirstOrDefault(x => x.Id == userId); // get current user
+            var user = _applicationDbContext.ApplicationUsers.FirstOrDefault(x => x.Id == userId); // get current user
             if (user == null) return NotFound();
 
             var userRoles = _applicationDbContext.UserRoles.ToList(); // list of users with role
@@ -81,7 +81,7 @@ namespace IdentityManager.Controllers
         {
             if(ModelState.IsValid)
             {
-                var userFromDb = _applicationDbContext.ApplicationUser.FirstOrDefault(x => x.Id == user.Id); // get current user
+                var userFromDb = _applicationDbContext.ApplicationUsers.FirstOrDefault(x => x.Id == user.Id); // get current user
                 if (userFromDb == null) return NotFound();
 
                 var userRole = _applicationDbContext.UserRoles.FirstOrDefault(x => x.UserId == userFromDb.Id);
@@ -116,7 +116,7 @@ namespace IdentityManager.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult LockUnlock(string userId)
         {
-            var userFromDb = _applicationDbContext.ApplicationUser.FirstOrDefault(x => x.Id == userId);
+            var userFromDb = _applicationDbContext.ApplicationUsers.FirstOrDefault(x => x.Id == userId);
 
             if (userFromDb == null) return NotFound();
 
@@ -140,7 +140,7 @@ namespace IdentityManager.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteUser(string userId)
         {
-            var userFromDb = _applicationDbContext.ApplicationUser.FirstOrDefault(x => x.Id == userId);
+            var userFromDb = _applicationDbContext.ApplicationUsers.FirstOrDefault(x => x.Id == userId);
 
             if (userFromDb == null) return NotFound();
 
